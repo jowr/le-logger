@@ -16,7 +16,7 @@ app = Flask(__name__)
 def hello():
     return 'Hello World with Flask and JJ!'
 
-@apply.route('/pic')
+@app.route('/pic')
 def pic():
     from bokeh.plotting import figure, output_file, show, save
     from bokeh.embed import file_html
