@@ -88,7 +88,7 @@ def polynomial():
             return obj[item]
 
     # Grab the inputs arguments from the URL
-    args = {} #flask.request.args
+    args = flask.request.args
 
     # Get all the form arguments in the url with defaults
     color = getitem(args, 'color', 'Black')
