@@ -1,5 +1,6 @@
 Flask
 Flask-SQLAlchemy
+Bokeh
 Jinja2
 Werkzeug
 wsgiref
