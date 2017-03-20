@@ -7,7 +7,7 @@ if 'DYNO' in os.environ:
 else:
     HEROKU = False
 
-BASE_PATH = os.path.dirname(__file__)
+BASE_PATH = os.path.realpath(os.path.dirname(__file__))
 
 # The main app
 import flask 
