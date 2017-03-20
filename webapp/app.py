@@ -12,7 +12,7 @@ BASE_PATH = os.path.realpath(os.path.dirname(__file__))
 # The main app
 import flask 
 from flask import Flask
-app = Flask(__name__)
+app = Flask(__name__, template_folder=os.path.join(BASE_PATH,'templates'))
 
 # All the views
 @app.route('/')
@@ -107,7 +107,7 @@ def polynomial():
     
     try:
         html = flask.render_template(
-            os.path.join(BASE_PATH,'templates','embed.html'),
+            'embed.html',
             plot_script=script,
             plot_div=div,
             js_resources=js_resources,
