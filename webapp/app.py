@@ -114,7 +114,8 @@ def polynomial():
         _from=_from,
         to=to
     )
-    return encode_utf8(html)
+    #return encode_utf8(html)
+    return html
 
 
 # ... add the main method for Heroku at the end
