@@ -104,18 +104,22 @@ def polynomial():
     css_resources = INLINE.render_css()
 
     script, div = components(fig)
-    html = flask.render_template(
-        os.path.join(BASE_PATH,'templates','embed.html'),
-        plot_script=script,
-        plot_div=div,
-        js_resources=js_resources,
-        css_resources=css_resources,
-        color=color,
-        _from=_from,
-        to=to
-    )
-    #return encode_utf8(html)
-    return html
+    
+    try:
+        html = flask.render_template(
+            os.path.join(BASE_PATH,'templates','embed.html'),
+            plot_script=script,
+            plot_div=div,
+            js_resources=js_resources,
+            css_resources=css_resources,
+            color=color,
+            _from=_from,
+            to=to
+        )
+        #return encode_utf8(html)
+        return html
+    except Exception as e:
+        return str(e)
 
 
 # ... add the main method for Heroku at the end
