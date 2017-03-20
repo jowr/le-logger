@@ -48,7 +48,8 @@ def pic():
     # show the results
     #show(p)
 
-    return file_html(p, {})
+    #return file_html(p, {})
+    return "Test" 
 
 # ... add the main method for Heroku at the end
 if HEROKU:
