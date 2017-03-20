@@ -11,7 +11,7 @@ app = Flask(__name__)
 # Start with the views
 @app.route('/')
 def hello():
-    return 'Hello World with Flask!'
+    return 'Hello World with Flask and JJ!'
 
 # ... add the main method for Heroku at the end
 if HEROKU:
