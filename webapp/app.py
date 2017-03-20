@@ -19,6 +19,7 @@ def hello():
 @app.route('/pic')
 def pic():
     from bokeh.plotting import figure, output_file, show, save
+    from bokeh.resources import CDN
     from bokeh.embed import file_html
 
     # prepare some data
@@ -48,8 +49,18 @@ def pic():
     # show the results
     #show(p)
 
-    #return file_html(p, {})
-    return "Test" 
+    return file_html(p, CDN)
+
+@app.route('/plot')
+def circel():
+    from bokeh.plotting import figure
+    from bokeh.resources import CDN
+    from bokeh.embed import file_html
+
+    plot = figure()
+    plot.circle([1,2], [3,4])
+
+    return file_html(plot, CDN, "my plot")
 
 # ... add the main method for Heroku at the end
 if HEROKU:
