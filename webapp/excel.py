@@ -18,7 +18,7 @@ class ExcelFile():
 
     def xlInfo(self,theFile):
         res = 'Logger serial: ' + self.xlSerial(theFile) + '\n'
-        return res + self.xlData(theFile)
+        return res #+ self.xlData(theFile)
 
     def xlSerial(self,theFile):
         xlSheet = self.xlLoad(theFile,theSheet=0)
