@@ -1,10 +1,13 @@
-from __future__ import print_function, division
+from __future__ import print_function, division, absolute_import
 
 import os, sys
 import urlparse
 
 BASE_PATH = os.path.realpath(os.path.dirname(__file__))
 TEMP_PATH = os.path.join(BASE_PATH,'templates')
+
+if BASE_PATH not in sys.path:
+    sys.path = [BASE_PATH] + sys.path
 
 if 'DYNO' in os.environ:
     HEROKU = True
@@ -35,6 +38,12 @@ app = Flask(__name__, template_folder=os.path.join(BASE_PATH,'templates'))
 @app.route('/')
 def hello():
     return 'Hello World with Flask and JJ!'
+
+@app.route('/model')
+def model():
+    from models import MeasurementCampaign
+    meas = MeasurementCampaign('default')
+    return str(meas)
 
 @app.route('/pic')
 def pic():
