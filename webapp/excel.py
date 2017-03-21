@@ -4,16 +4,37 @@ class ExcelFile():
     class ExcelValueError(ValueError): pass  # base exception class
     class ExcelTypeError(TypeError): pass
 
+    #def is_xlsx(self, file):
+    #    #use openpyxl?
+    #    return file.filename.rsplit('.', 1)[1] in ['xlsx', 'xlsm', 'xltx', 'xltm']
+    #def is_xls(self, file):
+    #    return file.filename.rsplit('.', 1)[1] in ['xls']    
+
     def xlLoad(self,theFile,theSheet=0):
         # Read the stream instead of passing the file name
         xlBook = xlrd.open_workbook(file_contents=theFile.read())
         xlSheet = xlBook.sheet_by_index(theSheet)
         return xlSheet
 
+    def xlInfo(self,theFile):
+        res = ''
+        res += 'Logger serial: ' + self.xlSerial(theFile) + '\n'
+        return res + self.xlData(theFile)
+
     def xlSerial(self,theFile):
         xlSheet = self.xlLoad(theFile,theSheet=0)
-        return str([xlSheet.cell_value(9, 0),xlSheet.cell_value(9, 1),xlSheet.cell_value(9, 2),xlSheet.cell_value(10, 0),xlSheet.cell_value(10, 1),xlSheet.cell_value(10, 2)])
+        return str(xlSheet.cell_value(9, 1))
 
+    def xlData(self,theFile):
+        res = ''
+        xlSheet = self.xlLoad(theFile,theSheet=0)
+        cells = xlSheet.col_slice(1,19,None)
+        res += 'Time values: ' + str(len(cells)) + '\n'
+        cells = xlSheet.col_slice(2,19,None)
+        res += 'Temperature values: ' + str(len(cells)) + '\n'
+        cells = xlSheet.col_slice(2,19,None)
+        res += 'Humidity values: ' + str(len(cells)) + '\n'
+        return res
 
 
 #def get_col_num(s):

@@ -224,7 +224,7 @@ def upload():
             #return flask.redirect(flask.url_for('uploaded_file', filename=filename))
             #return file.read()
             xlFile = ExcelFile()
-            return xlFile.xlSerial(file)
+            return xlFile.xlInfo(file)
     except Exception as e:
         return str(e)    
     return "No luck"
