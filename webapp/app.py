@@ -154,7 +154,7 @@ def test_database_simple():
         host=url.hostname,
         port=url.port
     )
-    return os.environ["DATABASE_URL"]
+    return PGDB_URI
 
 @app.route("/dbtest")
 def test_database():
