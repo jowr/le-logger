@@ -1,13 +1,30 @@
 from __future__ import print_function, division
 
 import os, sys
+import urlparse
+
+BASE_PATH = os.path.realpath(os.path.dirname(__file__))
+TEMP_PATH = os.path.join(BASE_PATH,'templates')
 
 if 'DYNO' in os.environ:
     HEROKU = True
 else:
     HEROKU = False
 
-BASE_PATH = os.path.realpath(os.path.dirname(__file__))
+if HEROKU:
+    urlparse.uses_netloc.append("postgres")
+    url = urlparse.urlparse(os.environ["DATABASE_URL"])
+    PGDB_NAME = url.path[1:]
+    PGDB_USER = url.username
+    PGDB_PASS = url.password
+    PGDB_HOST = url.hostname
+    PGDB_PORT = url.port
+    PGDB_URI = os.environ["DATABASE_URL"] # postgres://{user}:{password}@{hostname}:{port}/{database-name}
+else:
+    from private import PGDB_NAME, PGDB_USER, PGDB_PASS, PGDB_HOST, PGDB_PORT, PGDB_URI
+
+  
+
 
 # The main app
 import flask 
@@ -121,6 +138,35 @@ def polynomial():
     except Exception as e:
         return str(e)
 
+@app.route("/dbtest")
+def test_database():
+    from sqlalchemy import Column, Integer, String
+    from sqlalchemy.dialects import postgresql
+    from sqlalchemy.ext.declarative import declarative_base
+    from sqlalchemy import create_engine
+    from sqlalchemy.orm import sessionmaker
+
+    Base = declarative_base()
+
+    class TestUser(Base):
+        __tablename__ = 'testuser'
+        id = Column(Integer, primary_key=True)
+        name = Column(String(250))
+        numbers = Column(postgresql.ARRAY(Integer))
+
+    engine = create_engine(PGDB_URI)
+
+    Base.metadata.create_all(engine)
+
+    DBSession = sessionmaker(bind=engine)
+    session = DBSession()
+
+    testcases = [{"numbers": [25, 33, 42, 55], "name": "David"}, {"numbers": [11, 33, 7, 19 ], "name":     "Salazar"}, {"numbers": [32, 6, 20, 23 ], "name": "Belinda"}, {"numbers": [19, 20, 27, 8 ], "name": "Casey"},     {"numbers": [25, 31, 10, 40 ], "name": "Kathie"}, {"numbers": [25, 20, 40, 39 ], "name": "Dianne"},     {"numbers": [1, 20, 18, 38 ], "name": "Cortez"} ]
+
+    for t in testcases:
+        session.add(TestUser(name=t['name'], numbers=t['numbers']))
+    session.commit()
+    return session.info
 
 # ... add the main method for Heroku at the end
 if HEROKU:
