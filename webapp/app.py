@@ -181,7 +181,7 @@ def test_database():
         return str(e)
 
 #
-#import werkzeug
+import werkzeug
 #
 #@app.route('/upload')
 #def upload_file():
@@ -212,7 +212,7 @@ def upload():
     # Check if the file is one of the allowed types/extensions
     if file and allowed_file(file.filename):
         # Make the filename safe, remove unsupported chars
-        filename = secure_filename(file.filename)
+        filename = werkzeug.secure_filename(file.filename)
         # Move the file form the temporal folder to
         # the upload folder we setup
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
