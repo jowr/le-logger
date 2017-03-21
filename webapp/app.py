@@ -208,7 +208,7 @@ def allowed_file(filename):
 @app.route('/upload', methods=['POST'])
 def upload():
     # Get the name of the uploaded file
-    file = request.files['file']
+    file = flask.request.files['file']
     # Check if the file is one of the allowed types/extensions
     if file and allowed_file(file.filename):
         # Make the filename safe, remove unsupported chars
@@ -218,7 +218,7 @@ def upload():
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         # Redirect the user to the uploaded_file route, which
         # will basicaly show on the browser the uploaded file
-        return redirect(url_for('uploaded_file',
+        return flask.redirect(url_for('uploaded_file',
                                 filename=filename))
 
 # This route is expecting a parameter containing the name
@@ -227,12 +227,12 @@ def upload():
 # an image, that image is going to be show after the upload
 @app.route('/data/<filename>')
 def uploaded_file(filename):
-    return send_from_directory(app.config['UPLOAD_FOLDER'],
+    return flask.send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
 
 @app.route('/uploader')
 def uploader():
-    return render_template('upload.html')
+    return flask.render_template('upload.html')
 
 # ... add the main method for Heroku at the end
 if s.HEROKU:
