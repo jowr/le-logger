@@ -5,7 +5,7 @@ class ExcelFile():
     class ExcelTypeError(TypeError): pass
 
     def xlLoad(self,theFile,theSheet=0):
-        xlBook = xlrd.open_workbook(theFile)
+        xlBook = xlrd.open_workbook(file_contents=theFile.read())
         xlSheet = xlBook.sheet_by_index(theSheet)
         return xlSheet
 
