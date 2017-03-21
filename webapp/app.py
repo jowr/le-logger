@@ -152,7 +152,8 @@ def test_database_simple():
         user=url.username,
         password=url.password,
         host=url.hostname,
-        port=url.port
+        port=url.port, 
+        sslmode='require'
     )
     return PGDB_URI
 
@@ -173,7 +174,7 @@ def test_database():
             name = Column(String(250))
             numbers = Column(postgresql.ARRAY(Integer))
 
-        engine = create_engine(PGDB_URI)
+        engine = create_engine(PGDB_URI, sslmode='require')
 
         Base.metadata.create_all(engine)
 
