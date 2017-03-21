@@ -12,7 +12,7 @@ from settings import const as s
 # The main app
 import flask 
 from flask import Flask
-app = Flask(__name__, template_folder=os.path.join(s.BASE_PATH,'templates'))
+app = Flask(__name__, template_folder=s.TEMP_PATH)
 
 # All the views
 @app.route('/')
@@ -179,6 +179,60 @@ def test_database():
         return str(engine)
     except Exception as e:
         return str(e)
+
+#
+#import werkzeug
+#
+#@app.route('/upload')
+#def upload_file():
+#   return flask.render_template('upload.html')
+#
+#@app.route('/uploader', methods = ['GET', 'POST'])
+#def upload_file():
+#   if flask.request.method == 'POST':
+#      f = flask.request.files['file']
+#      f.save(werkzeug.secure_filename(f.filename))
+#      return 'file uploaded successfully'
+
+# This is the path to the upload directory
+app.config['UPLOAD_FOLDER'] = s.DATA_PATH
+# These are the extension that we are accepting to be uploaded
+app.config['ALLOWED_EXTENSIONS'] = set(['csv', 'xls', 'xlsx'])
+
+# For a given file, return whether it's an allowed type or not
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
+
+# Route that will process the file upload
+@app.route('/upload', methods=['POST'])
+def upload():
+    # Get the name of the uploaded file
+    file = request.files['file']
+    # Check if the file is one of the allowed types/extensions
+    if file and allowed_file(file.filename):
+        # Make the filename safe, remove unsupported chars
+        filename = secure_filename(file.filename)
+        # Move the file form the temporal folder to
+        # the upload folder we setup
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        # Redirect the user to the uploaded_file route, which
+        # will basicaly show on the browser the uploaded file
+        return redirect(url_for('uploaded_file',
+                                filename=filename))
+
+# This route is expecting a parameter containing the name
+# of a file. Then it will locate that file on the upload
+# directory and show it on the browser, so if the user uploads
+# an image, that image is going to be show after the upload
+@app.route('/data/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'],
+                               filename)
+
+@app.route('/uploader')
+def uploader():
+    return render_template('upload.html')
 
 # ... add the main method for Heroku at the end
 if s.HEROKU:
