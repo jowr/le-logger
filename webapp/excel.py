@@ -5,13 +5,14 @@ class ExcelFile():
     class ExcelTypeError(TypeError): pass
 
     def xlLoad(self,theFile,theSheet=0):
+        # Read the stream instead of passing the file name
         xlBook = xlrd.open_workbook(file_contents=theFile.read())
         xlSheet = xlBook.sheet_by_index(theSheet)
         return xlSheet
 
     def xlSerial(self,theFile):
         xlSheet = self.xlLoad(theFile,theSheet=0)
-        return xlSheet.cell_value(10, 2)
+        return str([xlSheet.cell_value(9, 0),xlSheet.cell_value(9, 1),xlSheet.cell_value(9, 2),xlSheet.cell_value(10, 0),xlSheet.cell_value(10, 1),xlSheet.cell_value(10, 2)])
 
 
 
