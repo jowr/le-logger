@@ -1,5 +1,7 @@
 Flask
 Flask-SQLAlchemy
+SQLAlchemy
+psycopg2
 Bokeh
 Jinja2
 Werkzeug
