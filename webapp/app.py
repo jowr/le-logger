@@ -9,25 +9,10 @@ if BASE_PATH not in sys.path:
 
 from settings import const as s
 
-if s.HEROKU:
-    urlparse.uses_netloc.append("postgres")
-    url = urlparse.urlparse(os.environ["DATABASE_URL"])
-    PGDB_NAME = url.path[1:]
-    PGDB_USER = url.username
-    PGDB_PASS = url.password
-    PGDB_HOST = url.hostname
-    PGDB_PORT = url.port
-    PGDB_URI = os.environ["DATABASE_URL"] # postgres://{user}:{password}@{hostname}:{port}/{database-name}
-else:
-    from private import PGDB_NAME, PGDB_USER, PGDB_PASS, PGDB_HOST, PGDB_PORT, PGDB_URI
-
-  
-
-
 # The main app
 import flask 
 from flask import Flask
-app = Flask(__name__, template_folder=os.path.join(BASE_PATH,'templates'))
+app = Flask(__name__, template_folder=os.path.join(s.BASE_PATH,'templates'))
 
 # All the views
 @app.route('/')
@@ -159,7 +144,7 @@ def test_database_simple():
         port=url.port, 
         sslmode='require'
     )
-    return PGDB_URI
+    return s.PGDB_URI
 
 @app.route("/dbtest")
 def test_database():
@@ -178,7 +163,7 @@ def test_database():
             name = Column(String(250))
             numbers = Column(postgresql.ARRAY(Integer))
 
-        engine = create_engine(PGDB_URI, connect_args={'sslmode':'require'})
+        engine = create_engine(s.PGDB_URI, connect_args={'sslmode':'require'})
 
         Base.metadata.create_all(engine)
 
