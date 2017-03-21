@@ -43,7 +43,7 @@ def hello():
 def model():
     from models import MeasurementCampaign
     meas = MeasurementCampaign('default')
-    return str(meas)
+    return repr(meas)
 
 @app.route('/pic')
 def pic():
