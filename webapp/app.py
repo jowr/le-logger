@@ -174,7 +174,7 @@ def test_database():
             name = Column(String(250))
             numbers = Column(postgresql.ARRAY(Integer))
 
-        engine = create_engine(PGDB_URI, sslmode='require')
+        engine = create_engine(PGDB_URI, connect_args={'sslmode':'require'})
 
         Base.metadata.create_all(engine)
 
