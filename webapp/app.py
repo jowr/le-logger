@@ -213,12 +213,13 @@ def upload():
     if file and allowed_file(file.filename):
         # Make the filename safe, remove unsupported chars
         filename = werkzeug.secure_filename(file.filename)
-        # Move the file form the temporal folder to
-        # the upload folder we setup
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-        # Redirect the user to the uploaded_file route, which
-        # will basicaly show on the browser the uploaded file
-        return flask.redirect(flask.url_for('uploaded_file', filename=filename))
+        ## Move the file form the temporal folder to
+        ## the upload folder we setup
+        #file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        ## Redirect the user to the uploaded_file route, which
+        ## will basicaly show on the browser the uploaded file
+        #return flask.redirect(flask.url_for('uploaded_file', filename=filename))
+        return file.read()
 
 # This route is expecting a parameter containing the name
 # of a file. Then it will locate that file on the upload
