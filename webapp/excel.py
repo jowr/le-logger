@@ -17,8 +17,7 @@ class ExcelFile():
         return xlSheet
 
     def xlInfo(self,theFile):
-        res = ''
-        res += 'Logger serial: ' + self.xlSerial(theFile) + '\n'
+        res = 'Logger serial: ' + self.xlSerial(theFile) + '\n'
         return res + self.xlData(theFile)
 
     def xlSerial(self,theFile):
@@ -28,12 +27,13 @@ class ExcelFile():
     def xlData(self,theFile):
         res = ''
         xlSheet = self.xlLoad(theFile,theSheet=0)
-        cells = xlSheet.col_slice(1,19,None)
-        res += 'Time values: ' + str(len(cells)) + '\n'
-        cells = xlSheet.col_slice(2,19,None)
-        res += 'Temperature values: ' + str(len(cells)) + '\n'
-        cells = xlSheet.col_slice(2,19,None)
-        res += 'Humidity values: ' + str(len(cells)) + '\n'
+        res = str(xlSheet.nrows)
+        #cells = xlSheet.col_slice(1,19,None)
+        #res += 'Time values: ' + str(len(cells)) + '\n'
+        #cells = xlSheet.col_slice(2,19,None)
+        #res += 'Temperature values: ' + str(len(cells)) + '\n'
+        #cells = xlSheet.col_slice(2,19,None)
+        #res += 'Humidity values: ' + str(len(cells)) + '\n'
         return res
 
 
