@@ -204,6 +204,7 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 
+from excel import ExcelFile
 # Route that will process the file upload
 @app.route('/upload', methods=['POST'])
 def upload():
@@ -211,15 +212,19 @@ def upload():
     file = flask.request.files['file']
     # Check if the file is one of the allowed types/extensions
     if file and allowed_file(file.filename):
-        # Make the filename safe, remove unsupported chars
-        filename = werkzeug.secure_filename(file.filename)
+        ## Make the filename safe, remove unsupported chars
+        #filename = werkzeug.secure_filename(file.filename)
+        #return filename
         ## Move the file form the temporal folder to
         ## the upload folder we setup
         #file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         ## Redirect the user to the uploaded_file route, which
         ## will basicaly show on the browser the uploaded file
         #return flask.redirect(flask.url_for('uploaded_file', filename=filename))
-        return file.read()
+        #return file.read()
+        xlFile = ExcelFile()
+        return xlFile.xlSerial(file)
+    return "No luck"
 
 # This route is expecting a parameter containing the name
 # of a file. Then it will locate that file on the upload

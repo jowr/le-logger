@@ -7,3 +7,4 @@ Bokeh
 Jinja2
 Werkzeug
 wsgiref
+xlrd
