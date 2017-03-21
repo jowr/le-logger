@@ -218,8 +218,7 @@ def upload():
         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         # Redirect the user to the uploaded_file route, which
         # will basicaly show on the browser the uploaded file
-        return flask.redirect(url_for('uploaded_file',
-                                filename=filename))
+        return flask.redirect(flask.url_for('uploaded_file', filename=filename))
 
 # This route is expecting a parameter containing the name
 # of a file. Then it will locate that file on the upload
