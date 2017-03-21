@@ -4,17 +4,12 @@ import os, sys
 import urlparse
 
 BASE_PATH = os.path.realpath(os.path.dirname(__file__))
-TEMP_PATH = os.path.join(BASE_PATH,'templates')
-
 if BASE_PATH not in sys.path:
     sys.path = [BASE_PATH] + sys.path
 
-if 'DYNO' in os.environ:
-    HEROKU = True
-else:
-    HEROKU = False
+from settings import const as s
 
-if HEROKU:
+if s.HEROKU:
     urlparse.uses_netloc.append("postgres")
     url = urlparse.urlparse(os.environ["DATABASE_URL"])
     PGDB_NAME = url.path[1:]
@@ -201,7 +196,7 @@ def test_database():
         return str(e)
 
 # ... add the main method for Heroku at the end
-if HEROKU:
+if s.HEROKU:
     if __name__ == '__main__':
         # Bind to PORT if defined, otherwise default to 5000.
         port = int(os.environ.get('PORT', 5000))
