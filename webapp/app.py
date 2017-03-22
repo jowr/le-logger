@@ -165,7 +165,8 @@ def test_database():
         ds.name = 'test name'
         ds.time_series = np.zeros(5)
         ds.temp_series = np.ones(5)
-        ds.humi_series = np.empty(5)
+        ds.humi_series = np.empty(5).fill(np.NaN)
+        ds.campaign = ca
         
         se.add(ca)
         se.add(ds)

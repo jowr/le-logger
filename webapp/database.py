@@ -1,8 +1,8 @@
-from sqlalchemy import Column, Float, Integer, String
+from sqlalchemy import Column, Float, Integer, String, ForeignKey
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, relationship
 
 Base = declarative_base()
 
@@ -23,7 +23,7 @@ class DataSet(Base):
     campaign_id = Column(Integer, ForeignKey('campaigns.id'))
     campaign = relationship("Campaign", back_populates="datasets")
 
-Campaign.datasets = relationship("DataSet", order_by=DataSet.id, back_populates="campaigns")
+Campaign.datasets = relationship("DataSet", order_by=DataSet.id, back_populates="campaign")
 
 def create_models_engine(PGDB_URI):
     engine = create_engine(PGDB_URI, connect_args={'sslmode':'require'})
