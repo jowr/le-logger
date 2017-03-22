@@ -1,8 +1,14 @@
 import xlrd
+import numpy as np
+
+from functions import isnat
 
 class ExcelFile():
     class ExcelValueError(ValueError): pass  # base exception class
     class ExcelTypeError(TypeError): pass
+
+    def __init__(self, file):
+        self.file = file
 
     #def is_xlsx(self, file):
     #    #use openpyxl?
@@ -10,30 +16,59 @@ class ExcelFile():
     #def is_xls(self, file):
     #    return file.filename.rsplit('.', 1)[1] in ['xls']    
 
-    def xlLoad(self,theFile,theSheet=0):
+    def xlLoad(self,theSheet=0):
         # Read the stream instead of passing the file name
-        xlBook = xlrd.open_workbook(file_contents=theFile.read())
-        xlSheet = xlBook.sheet_by_index(theSheet)
-        return xlSheet
+        xlBook = xlrd.open_workbook(file_contents=self.file.read())
+        self.xlSheet = xlBook.sheet_by_index(theSheet)
+        #return xlSheet
 
-    def xlInfo(self,theFile):
-        res = 'Logger serial: ' + self.xlSerial(theFile) + '\n'
-        return res #+ self.xlData(theFile)
+    def xlInfo(self):
+        res = 'Logger serial: ' + str(self.xlSheet.cell_value(9, 1)) + '\n'
+        return res
 
-    def xlSerial(self,theFile):
-        xlSheet = self.xlLoad(theFile,theSheet=0)
-        return str(xlSheet.cell_value(9, 1))
+    def xlSerial(self):
+        return str(self.xlSheet.cell_value(9, 1))
 
-    def xlData(self,theFile):
-        res = ''
-        xlSheet = self.xlLoad(theFile,theSheet=0)
-        res = str(xlSheet.nrows)
-        #cells = xlSheet.col_slice(1,19,None)
-        #res += 'Time values: ' + str(len(cells)) + '\n'
-        #cells = xlSheet.col_slice(2,19,None)
-        #res += 'Temperature values: ' + str(len(cells)) + '\n'
-        #cells = xlSheet.col_slice(2,19,None)
-        #res += 'Humidity values: ' + str(len(cells)) + '\n'
+    def xlData_datetime(self, row, col):
+        xlType = self.xlSheet.cell_type(row, col)
+        if xlType == xlrd.XL_CELL_TEXT or xlType == xlrd.XL_CELL_DATE:
+            string_var = unicode(self.xlSheet.cell_value(row, col))
+            string_var = u'20' + string_var.replace(' ','T')
+            string_var = string_var.replace('/','-')
+            try:
+                return np.datetime64(string_var)
+            except Exception as e:
+                return np.datetime64('NAT')
+        else:
+            return np.datetime64('NAT')
+
+    def xlData_float(self, row, col):
+        xlType = self.xlSheet.cell_type(row, col)
+        if xlType == xlrd.XL_CELL_NUMBER:
+            try:
+                return float(self.xlSheet.cell_value(row, col))
+            except Exception as e:
+                return np.NaN
+        else:
+            return np.NaN
+
+    def xlData(self):
+        row_offset = 19
+        rows = max(0,min(self.xlSheet.nrows,25000)-row_offset)
+        arr = np.empty(rows)
+        res = dict(info='', time=np.empty_like(arr, dtype='datetime64[s]'), temperature=np.empty_like(arr), humidity=np.empty_like(arr))
+        for i in range(rows):
+            idx = row_offset+i
+            res['time'][i] = self.xlData_datetime(idx,1)
+            res['temperature'][i] = self.xlData_float(idx, 2)
+            res['humidity'][i] = self.xlData_float(idx, 3)
+           
+        #cells = self.xlSheet.col_slice(1,19,None)
+        #res['info'] += 'Time values: ' + str(len(cells)) + '\n'
+        #cells = self.xlSheet.col_slice(2,19,None)
+        #res['info'] += 'Temperature values: ' + str(len(cells)) + '\n'
+        #cells = self.xlSheet.col_slice(3,19,None)
+        #res['info'] += 'Humidity values: ' + str(len(cells)) + '\n'
         return res
 
 
