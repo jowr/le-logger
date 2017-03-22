@@ -146,36 +146,11 @@ def test_database_simple():
     )
     return s.PGDB_URI
 
+import database as db
 @app.route("/dbtest")
 def test_database():
     try:
-        from sqlalchemy import Column, Integer, String
-        from sqlalchemy.dialects import postgresql
-        from sqlalchemy.ext.declarative import declarative_base
-        from sqlalchemy import create_engine
-        from sqlalchemy.orm import sessionmaker
-
-        Base = declarative_base()
-
-        class TestUser(Base):
-            __tablename__ = 'testuser'
-            id = Column(Integer, primary_key=True)
-            name = Column(String(250))
-            numbers = Column(postgresql.ARRAY(Integer))
-
-        engine = create_engine(s.PGDB_URI, connect_args={'sslmode':'require'})
-
-        Base.metadata.create_all(engine)
-
-        #DBSession = sessionmaker(bind=engine)
-        #session = DBSession()
-        #
-        ##testcases = [{"numbers": [25, 33, 42, 55], "name": "David"}, {"numbers": [11, 33, 7, 19 ], "name":     "Salazar"}, {"numbers": [32, 6, 20, 23 ], "name": "Belinda"}, {"numbers": [19, 20, 27, 8 ], "name": "Casey"},     {"numbers": [25, 31, 10, 40 ], "name": "Kathie"}, {"numbers": [25, 20, 40, 39 ], "name": "Dianne"},     {"numbers": [1, 20, 18, 38 ], "name": "Cortez"} ]
-        ##
-        ##for t in testcases:
-        ##    session.add(TestUser(name=t['name'], numbers=t['numbers']))
-        ##session.commit()
-        #return session.info
+        engine = db.create_models_engine(s.PGDB_URI)
         return str(engine)
     except Exception as e:
         return str(e)

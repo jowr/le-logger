@@ -12,3 +12,13 @@ class MeasurementCampaign(object):
 
     def __repr__(self):
         return '<Category %r>' % self.name
+
+class MeasurementSet(object):
+    id = 0
+    campaign = "The category"
+
+    def __init__(self, name):
+        self.name = name
+
+    def __repr__(self):
+        return '<Category %r>' % self.name
