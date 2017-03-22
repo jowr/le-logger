@@ -149,9 +149,20 @@ def test_database_simple():
 import database as db
 @app.route("/dbtest")
 def test_database():
+    from sqlalchemy.orm import sessionmaker
+    from database import DataSeries
+    import numpy as np
     try:
         engine = db.create_models_engine(s.PGDB_URI)
-        return str(engine)
+        session = sessionmaker(bind=engine)
+        ds = DataSeries()
+        ds.name = 'test name'
+        ds.time_series = np.zeros(5)
+        ds.temp_series = np.ones(5)
+        ds.humi_series = np.empty(5)
+        session.add(ds)
+        session.commit()
+        return str(ds)
     except Exception as e:
         return str(e)
 
