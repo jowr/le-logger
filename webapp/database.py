@@ -12,8 +12,6 @@ class Campaign(Base):
     name = Column(String(250))
     desc = Column(String(1000))
 
-    datasets = relationship("DataSet", order_by=DataSet.id, back_populates="campaigns")
-
 class DataSet(Base):
     __tablename__ = 'datasets'
     id = Column(Integer, primary_key=True)
@@ -24,6 +22,8 @@ class DataSet(Base):
 
     campaign_id = Column(Integer, ForeignKey('campaigns.id'))
     campaign = relationship("Campaign", back_populates="datasets")
+
+Campaign.datasets = relationship("DataSet", order_by=DataSet.id, back_populates="campaigns")
 
 def create_models_engine(PGDB_URI):
     engine = create_engine(PGDB_URI, connect_args={'sslmode':'require'})
