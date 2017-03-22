@@ -154,14 +154,15 @@ def test_database():
     import numpy as np
     try:
         engine = db.create_models_engine(s.PGDB_URI)
-        session = sessionmaker(bind=engine)
+        Session = sessionmaker(bind=engine)
+        se = Session()
         ds = DataSeries()
         ds.name = 'test name'
         ds.time_series = np.zeros(5)
         ds.temp_series = np.ones(5)
         ds.humi_series = np.empty(5)
-        session.add(ds)
-        session.commit()
+        se.add(ds)
+        se.commit()
         return str(ds)
     except Exception as e:
         return str(e)
