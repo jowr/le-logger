@@ -6,14 +6,24 @@ from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
 
-class DataSeries(Base):
-    __tablename__ = 'testseries'
+class Campaign(Base):
+    __tablename__ = 'campaigns'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(250))
+    desc = Column(String(1000))
+
+    datasets = relationship("DataSet", order_by=DataSet.id, back_populates="campaigns")
+
+class DataSet(Base):
+    __tablename__ = 'datasets'
     id = Column(Integer, primary_key=True)
     name = Column(String(250))
     time_series = Column(postgresql.ARRAY(Float))
     temp_series = Column(postgresql.ARRAY(Float))
     humi_series = Column(postgresql.ARRAY(Float))
 
+    campaign_id = Column(Integer, ForeignKey('campaigns.id'))
+    campaign = relationship("Campaign", back_populates="datasets")
 
 def create_models_engine(PGDB_URI):
     engine = create_engine(PGDB_URI, connect_args={'sslmode':'require'})

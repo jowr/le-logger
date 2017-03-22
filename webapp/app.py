@@ -150,20 +150,27 @@ import database as db
 @app.route("/dbtest")
 def test_database():
     from sqlalchemy.orm import sessionmaker
-    from database import DataSeries
+    from database import Campaign, DataSet
     import numpy as np
     try:
         engine = db.create_models_engine(s.PGDB_URI)
         Session = sessionmaker(bind=engine)
         se = Session()
-        ds = DataSeries()
+
+        ca = Campaign()
+        ca.name = "Test campaign"
+        ca.desc = "A longer description"
+        
+        ds = DataSet()
         ds.name = 'test name'
         ds.time_series = np.zeros(5)
         ds.temp_series = np.ones(5)
         ds.humi_series = np.empty(5)
+        
+        se.add(ca)
         se.add(ds)
         se.commit()
-        return str(ds)
+        return str(ds) + " and " + str(ca)
     except Exception as e:
         return str(e)
 
