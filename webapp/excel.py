@@ -1,14 +1,72 @@
 import xlrd
+import datetime
 import numpy as np
 
 from functions import isnat
 
-class ExcelFile():
-    class ExcelValueError(ValueError): pass  # base exception class
+class ExcelFile(object):
+    class ExcelValueError(ValueError): pass
     class ExcelTypeError(TypeError): pass
 
-    def __init__(self, file):
-        self.file = file
+    def __init__(self, file=None):
+        self.reset()
+        self._file = file
+
+    def reset(self):
+        self._file = None
+        self._xlSheet = None
+        self._time = None
+        self._temperature = None
+        self._humidity = None
+        self._serial = None
+        self._valid = None
+
+    @property
+    def file(self):
+        """Get or set the data source by means of a file stream, requires the 
+        file.read() method to be present in the passed object.
+        """
+        return self._file
+
+    @file.setter
+    def file(self, value):
+        self.reset()
+        self._file = value
+
+    def time_datetime(self):
+        """The time series as a list of the type datetime objects.
+        """
+        arr = [datetime.datetime.now()] * self.time.size
+        for i in range(self.time.size):
+            arr[i] = self.time[i].astype('O')
+        return arr
+        #return self._time
+
+    @property
+    def time(self):
+        """The time series as a numpy array of the type datetime64.
+        """
+        return self._time[self._valid]
+
+    @property
+    def temperature(self):
+        """The temperature as a numpy array, note that the logger 
+        saves data in degrees Celsius and not Kelvin.
+        """
+        return self._temperature[self._valid]
+
+    @property
+    def humidity(self):
+        """The humidity data as a numpy array, data is logged as
+        relative humidity.
+        """
+        return self._humidity[self._valid]
+
+    @property
+    def serial(self):
+        """The serial of the logger, extracted from the Excel sheet.
+        """
+        return self._serial
 
     #def is_xlsx(self, file):
     #    #use openpyxl?
@@ -17,51 +75,64 @@ class ExcelFile():
     #    return file.filename.rsplit('.', 1)[1] in ['xls']    
 
     def xlLoad(self,theSheet=0):
-        # Read the stream instead of passing the file name
-        xlBook = xlrd.open_workbook(file_contents=self.file.read())
-        self.xlSheet = xlBook.sheet_by_index(theSheet)
-        #return xlSheet
+        if self._xlSheet is None:
+            # Read the stream instead of passing the file name
+            if self._file is not None:
+                xlBook = xlrd.open_workbook(file_contents=self._file.read())
+                self._xlSheet = xlBook.sheet_by_index(theSheet)
+                self._xlData()
+            else:
+                raise ExcelValueError("No file stream available, set the file property.")
 
-    def xlInfo(self):
-        res = 'Logger serial: ' + str(self.xlSheet.cell_value(9, 1)) + '\n'
-        return res
-
-    def xlSerial(self):
-        return str(self.xlSheet.cell_value(9, 1))
-
-    def xlData_datetime(self, row, col):
-        xlType = self.xlSheet.cell_type(row, col)
-        if xlType == xlrd.XL_CELL_TEXT or xlType == xlrd.XL_CELL_DATE:
-            string_var = unicode(self.xlSheet.cell_value(row, col))
-            string_var = u'20' + string_var.replace(' ','T')
-            string_var = string_var.replace('/','-')
-            try:
+    def _xlData_datetime(self, row, col):
+        #self.xlLoad()
+        #xlType = self._xlSheet.cell_type(row, col)
+        #if xlType == xlrd.XL_CELL_TEXT or xlType == xlrd.XL_CELL_DATE:
+        string_var = unicode(self._xlSheet.cell_value(row, col))
+        string_var = u'20' + string_var.replace(' ','T')
+        string_var = string_var.replace('/','-')
+        try:
+            value = self._xlSheet.cell_value(row, col)
+            if value != "NC":
                 return np.datetime64(string_var)
-            except Exception as e:
+            else:
                 return np.datetime64('NAT')
-        else:
+        except Exception as e:
             return np.datetime64('NAT')
+        #else:
+        #    return np.datetime64('NAT')
 
-    def xlData_float(self, row, col):
-        xlType = self.xlSheet.cell_type(row, col)
-        if xlType == xlrd.XL_CELL_NUMBER:
-            try:
-                return float(self.xlSheet.cell_value(row, col))
-            except Exception as e:
+    def _xlData_float(self, row, col):
+        #self.xlLoad()
+        #xlType = self._xlSheet.cell_type(row, col)
+        #if xlType == xlrd.XL_CELL_NUMBER:
+        try:
+            value = self._xlSheet.cell_value(row, col)
+            if value != "NC":
+                return float(value)
+            else:
                 return np.NaN
-        else:
+        except Exception as e:
             return np.NaN
+        #else:
+        #    return np.NaN
 
-    def xlData(self):
+    def _xlData(self):
+        #self.xlLoad()
+        self._serial = str(self._xlSheet.cell_value(9, 1))
+
         row_offset = 19
-        rows = max(0,min(self.xlSheet.nrows,25000)-row_offset)
+        rows = max(0,min(self._xlSheet.nrows,25)-row_offset)
         arr = np.empty(rows)
-        res = dict(info='', time=np.empty_like(arr, dtype='datetime64[s]'), temperature=np.empty_like(arr), humidity=np.empty_like(arr))
+
+        self._time = np.empty_like(arr, dtype='datetime64[s]')
+        self._temperature = np.empty_like(arr)
+        self._humidity = np.empty_like(arr)
         for i in range(rows):
             idx = row_offset+i
-            res['time'][i] = self.xlData_datetime(idx,1)
-            res['temperature'][i] = self.xlData_float(idx, 2)
-            res['humidity'][i] = self.xlData_float(idx, 3)
+            self._time[i] = self._xlData_datetime(idx,1)
+            self._temperature[i] = self._xlData_float(idx, 2)
+            self._humidity[i] = self._xlData_float(idx, 3)
            
         #cells = self.xlSheet.col_slice(1,19,None)
         #res['info'] += 'Time values: ' + str(len(cells)) + '\n'
@@ -69,6 +140,23 @@ class ExcelFile():
         #res['info'] += 'Temperature values: ' + str(len(cells)) + '\n'
         #cells = self.xlSheet.col_slice(3,19,None)
         #res['info'] += 'Humidity values: ' + str(len(cells)) + '\n'
+
+        #arr.fill(3)
+        #self._valid = arr == (np.logical_not(isnat(self._time)) + np.isfinite(self._temperature) + np.isfinite(self._humidity))
+
+        self._valid = np.ones_like(arr, dtype='bool')
+
+        self._valid = np.logical_and(self._valid, np.logical_not(isnat(self._time)))
+        self._valid = np.logical_and(self._valid, np.isfinite(self._temperature))
+        self._valid = np.logical_and(self._valid, np.isfinite(self._humidity))
+
+        #self._valid = np.logical_and(np.logical_not(isnat(self._time)), np.isfinite(self._temperature))
+        #self._valid = np.logical_and(self._valid, np.isfinite(self._humidity))
+
+
+    def xlInfo(self):
+        self.xlLoad()
+        res = 'Logger serial: ' + str(self._xlSheet.cell_value(9, 1)) + '\n'
         return res
 
 

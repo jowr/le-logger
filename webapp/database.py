@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Float, Integer, String, ForeignKey
+from sqlalchemy import Column, Float, Integer, String, DateTime, ForeignKey
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
@@ -16,7 +16,7 @@ class DataSet(Base):
     __tablename__ = 'datasets'
     id = Column(Integer, primary_key=True)
     name = Column(String(250))
-    time_series = Column(postgresql.ARRAY(Float))
+    time_series = Column(postgresql.ARRAY(DateTime))
     temp_series = Column(postgresql.ARRAY(Float))
     humi_series = Column(postgresql.ARRAY(Float))
 
@@ -25,8 +25,8 @@ class DataSet(Base):
 
 Campaign.datasets = relationship("DataSet", order_by=DataSet.id, back_populates="campaign")
 
-def create_models_engine(PGDB_URI):
-    engine = create_engine(PGDB_URI, connect_args={'sslmode':'require'})
+def create_models_engine(PGDB_URI, echo=False):
+    engine = create_engine(PGDB_URI, connect_args={'sslmode':'require'}, echo=echo)
     Base.metadata.create_all(engine)
     return engine
 
