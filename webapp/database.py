@@ -2,7 +2,7 @@ from sqlalchemy import Column, Float, Integer, String, DateTime, ForeignKey
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker, relationship, reconstructor
 
 import numpy as np
 
@@ -25,7 +25,7 @@ class DataSet(Base):
     campaign_id = Column(Integer, ForeignKey('campaigns.id'))
 #    campaign = relationship("Campaign")#, back_populates="datasets")
 
-    @orm.reconstructor
+    @reconstructor
     def init_on_load(self):
         self.time_series = np.asanyarray(self.time_series)
         self.temp_series = np.asanyarray(self.temp_series)
