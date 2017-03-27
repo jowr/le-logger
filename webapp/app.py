@@ -203,6 +203,10 @@ def koekken2017():
     from sqlalchemy.orm import sessionmaker
     from database import Campaign, DataSet
     import numpy as np
+    from bokeh.embed import components
+    from bokeh.plotting import figure
+    from bokeh.resources import INLINE
+
     try:
         engine = db.create_models_engine(s.PGDB_URI)
         Session = sessionmaker(bind=engine)
