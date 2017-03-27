@@ -68,6 +68,13 @@ class ExcelFile(object):
         """
         return self._serial
 
+    #@property
+    #def pandas(self):
+    #    """The humidity data as a numpy array, data is logged as
+    #    relative humidity.
+    #    """
+    #    return self._humidity[self._valid]
+
     #def is_xlsx(self, file):
     #    #use openpyxl?
     #    return file.filename.rsplit('.', 1)[1] in ['xlsx', 'xlsm', 'xltx', 'xltm']

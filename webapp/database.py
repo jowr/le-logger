@@ -5,6 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, relationship, reconstructor
 
 import numpy as np
+import pandas as pd
 
 Base = declarative_base()
 
@@ -27,9 +28,12 @@ class DataSet(Base):
 
     @reconstructor
     def init_on_load(self):
+        #self.dataframe = pd.DataFrame(data=[self.time_series, self.temp_series, self.humi_series], columns=['time', 'temp', 'humi'])
         self.time_series = np.asanyarray(self.time_series)
         self.temp_series = np.asanyarray(self.temp_series)
         self.humi_series = np.asanyarray(self.humi_series)
+        
+
 
 #Campaign.datasets = relationship("DataSet", order_by=DataSet.id, back_populates="campaign")
 

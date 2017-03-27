@@ -9,3 +9,4 @@ Werkzeug
 wsgiref
 xlrd
 numpy
+pandas

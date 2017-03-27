@@ -198,6 +198,7 @@ def read_database():
     except Exception as e:
         return str(e)
 
+#https://github.com/bokeh/bokeh/blob/master/examples/embed/embed_multiple_responsive.py
 @app.route("/koekken2017")
 def koekken2017():
     from sqlalchemy.orm import sessionmaker
