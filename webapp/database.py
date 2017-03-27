@@ -4,6 +4,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, relationship
 
+import numpy as np
+
 Base = declarative_base()
 
 class Campaign(Base):
@@ -22,6 +24,12 @@ class DataSet(Base):
 
     campaign_id = Column(Integer, ForeignKey('campaigns.id'))
 #    campaign = relationship("Campaign")#, back_populates="datasets")
+
+    @orm.reconstructor
+    def init_on_load(self):
+        self.time_series = np.asanyarray(self.time_series)
+        self.temp_series = np.asanyarray(self.temp_series)
+        self.humi_series = np.asanyarray(self.humi_series)
 
 #Campaign.datasets = relationship("DataSet", order_by=DataSet.id, back_populates="campaign")
 

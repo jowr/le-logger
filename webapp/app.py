@@ -192,7 +192,7 @@ def read_database():
             ds_s = se.query(DataSet).filter(DataSet.campaign_id == ca.id).all()
             ret = ret + "Campaign: {0} ({1})\n".format(ca.name, len(ds_s))
             for ds in ds_s:
-                ret = ret + "DataSet: {0} ({1})\n".format(ds.name, len(ds.time_series))
+                ret = ret + "DataSet: {0} ({1})\n".format(ds.name, ds.time_series.size)
 
         return str(ret)
     except Exception as e:
