@@ -175,6 +175,29 @@ def test_database():
     except Exception as e:
         return str(e)
 
+@app.route("/dbread")
+def read_database():
+    from sqlalchemy.orm import sessionmaker
+    from database import Campaign, DataSet
+    import numpy as np
+    try:
+        engine = db.create_models_engine(s.PGDB_URI)
+        Session = sessionmaker(bind=engine)
+        se = Session()
+
+        ret = ""
+
+        ca_s = se.query(Campaign).all()
+        for ca in ca_s:
+            ds_s = se.query(DataSet).filter(DataSet.campaign_id == ca.id).all()
+            ret = ret + "Campaign: {0} ({1})\n".format(ca.name, len(ds_s))
+            for ds in ds_s:
+                ret = ret + "DataSet: {0} ({1})\n".format(ds.name, ds.time_series.size)
+
+        return str(ret)
+    except Exception as e:
+        return str(e)
+
 #
 import werkzeug
 #

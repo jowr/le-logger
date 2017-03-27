@@ -21,9 +21,9 @@ class DataSet(Base):
     humi_series = Column(postgresql.ARRAY(Float))
 
     campaign_id = Column(Integer, ForeignKey('campaigns.id'))
-    campaign = relationship("Campaign", back_populates="datasets")
+#    campaign = relationship("Campaign")#, back_populates="datasets")
 
-Campaign.datasets = relationship("DataSet", order_by=DataSet.id, back_populates="campaign")
+#Campaign.datasets = relationship("DataSet", order_by=DataSet.id, back_populates="campaign")
 
 def create_models_engine(PGDB_URI, echo=False):
     engine = create_engine(PGDB_URI, connect_args={'sslmode':'require'}, echo=echo)

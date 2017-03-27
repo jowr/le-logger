@@ -122,7 +122,7 @@ class ExcelFile(object):
         self._serial = str(self._xlSheet.cell_value(9, 1))
 
         row_offset = 19
-        rows = max(0,min(self._xlSheet.nrows,25)-row_offset)
+        rows = max(0,min(self._xlSheet.nrows,20000)-row_offset)
         arr = np.empty(rows)
 
         self._time = np.empty_like(arr, dtype='datetime64[s]')
