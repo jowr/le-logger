@@ -198,6 +198,61 @@ def read_database():
     except Exception as e:
         return str(e)
 
+@app.route("/koekken2017")
+def koekken2017():
+    from sqlalchemy.orm import sessionmaker
+    from database import Campaign, DataSet
+    import numpy as np
+    try:
+        engine = db.create_models_engine(s.PGDB_URI)
+        Session = sessionmaker(bind=engine)
+        se = Session()
+
+        ret = ""
+
+        fig = figure()
+
+        ca_s = se.query(Campaign).all()
+        for ca in ca_s:
+            ds_s = se.query(DataSet).filter(DataSet.campaign_id == ca.id).all()
+            for ds in ds_s:
+                fig.line(ds.time_series, ds.temp_series)
+        
+        
+        # Define our html template for out plots
+        from jinja2 import Template
+        template = Template('''<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Responsive plots</title>
+        {{ js_resources }}
+        {{ css_resources }}
+    </head>
+    <body>
+    <h2>Resize the window to see some plots resizing</h2>
+    <h3>Figure, responsive</h3>
+    {{ plot_div.fig }}
+    {{ plot_script }}
+    </body>
+</html>
+''')
+    
+        resources = INLINE
+        js_resources = resources.render_js()
+        css_resources = resources.render_css()
+        script, div = components({'fig': fig})
+        html = template.render(js_resources=js_resources,
+                               css_resources=css_resources,
+                               plot_script=script,plot_div=div)
+
+        #return encode_utf8(html)
+        return html
+
+    except Exception as e:
+        return str(e)
+
+
 #
 import werkzeug
 #
