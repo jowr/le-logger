@@ -72,16 +72,16 @@ if False:
         return ds_int
 
 
-    the_name = "Almindelig drift"   
+    the_name = "Ventilation i faelleskoekkenet 2017"   
     ca = se.query(Campaign).filter(Campaign.name == the_name).one_or_none()
     if ca is None:
         ca = Campaign()
         ca.name = the_name
         se.add(ca)
-    ca.desc = "Added on {0}".format(np.datetime64(datetime.datetime.now()))
+    ca.desc = "Temperatur- og fugtmaalinger, tilfoejet {0}.".format(np.datetime64(datetime.datetime.now()))
     se.commit()
     
-    the_name = "Opvaskerummet"
+    the_name = "Opvaskerum, reference"
     ds = se.query(DataSet).filter(and_(
         DataSet.name == the_name,
         DataSet.campaign_id == ca.id)
@@ -95,14 +95,14 @@ if False:
 
     with io.open(os.path.join(s.DATA_PATH,'20170321_LE01.xls'),'rb') as file:
         xlFile = ExcelFile(file)
-        xlFile.xlLoad()
-    
+        xlFile.xlLoad()    
     ds.time_series = xlFile.time_datetime()
     ds.temp_series = xlFile.temperature
     ds.humi_series = xlFile.humidity
     se.commit()
 
-    the_name = 'Koekkenet'
+
+    the_name = 'Koekken, reference'
     ds = se.query(DataSet).filter(and_(
         DataSet.name == the_name,
         DataSet.campaign_id == ca.id)
@@ -122,19 +122,8 @@ if False:
     ds.humi_series = xlFile.humidity
     se.commit()
 
-
-
-    the_name = "Uden udsugning"
-    ca = se.query(Campaign).filter(Campaign.name == the_name).one_or_none()
-    if ca is None:
-        ca = Campaign()
-        ca.name = the_name
-        se.add(ca)
-    ca.desc = "Added on {0}".format(np.datetime64(datetime.datetime.now()))
-    se.commit()
-
     
-    the_name = "Opvaskerummet"
+    the_name = "Opvaskerum, uden udsugning"
     ds = se.query(DataSet).filter(and_(
         DataSet.name == the_name,
         DataSet.campaign_id == ca.id)
@@ -148,15 +137,14 @@ if False:
 
     with io.open(os.path.join(s.DATA_PATH,'20170326_LE01.xls'),'rb') as file:
         xlFile = ExcelFile(file)
-        xlFile.xlLoad()
-    
+        xlFile.xlLoad()    
     ds.time_series = xlFile.time_datetime()
     ds.temp_series = xlFile.temperature
     ds.humi_series = xlFile.humidity
     se.commit()
 
 
-    the_name = 'Koekkenet'
+    the_name = "Koekken, uden udsugning"
     ds = se.query(DataSet).filter(and_(
         DataSet.name == the_name,
         DataSet.campaign_id == ca.id)
@@ -176,6 +164,7 @@ if False:
     ds.humi_series = xlFile.humidity
     se.commit()
 
+
 if True:
     import io
     from plotting import embed_multiple_responsive, embed_themed
@@ -191,7 +180,7 @@ if True:
     temp_series = []
     humi_series = []
 
-    ca_s = se.query(Campaign).all()
+    ca_s = se.query(Campaign).filter(Campaign.id == 1).all()
     for ca in ca_s:
         ds_s = se.query(DataSet).filter(DataSet.campaign_id == ca.id).all()
         for ds in ds_s:
