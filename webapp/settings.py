@@ -19,6 +19,11 @@ const.TEMP_PATH = os.path.join(const.BASE_PATH,'templates')
 const.STAT_PATH = os.path.join(const.BASE_PATH,'static')
 const.DATA_PATH = os.path.join(const.BASE_PATH,'data')
 
+os.makedirs(const.BASE_PATH)
+os.makedirs(const.TEMP_PATH)
+os.makedirs(const.STAT_PATH)
+os.makedirs(const.DATA_PATH)
+
 if 'DYNO' in os.environ:
     const.HEROKU = True
 else:
