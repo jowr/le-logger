@@ -22,10 +22,10 @@ import flask
 from flask import Flask
 app = Flask(__name__, template_folder=s.TEMP_PATH)
 
-# All the views
-@app.route('/')
-def hello():
-    return 'Hello World with Flask and JJ!'
+## All the views
+#@app.route('/')
+#def hello():
+#    return 'Hello World with Flask and JJ!'
 
 @app.route('/model')
 def model():
@@ -206,13 +206,14 @@ def read_database():
     except Exception as e:
         return str(e)
 
-
 @app.route("/start.html")
 def start_func():
     try:
         from database import Campaign, DataSet, get_campaign_and_data
         from plotting import alldata, operating_hours, statistics
         from renderer import render
+
+        ca, ds_s = get_campaign_and_data(se, "Ventilation i faelleskoekkenet 2017")
 
         js_resources = ""
         css_resources = ""
@@ -227,6 +228,10 @@ def start_func():
 
     except Exception as e:
         return str(e)
+
+@app.route('/')
+def index_func():
+    return start_func()
 
 @app.route("/altdata.html")
 def altdata_func():
