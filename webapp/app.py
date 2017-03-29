@@ -213,7 +213,8 @@ def start_func():
         from plotting import alldata, operating_hours, statistics
         from renderer import render
 
-        req_pth = os.path.join("/tmp", "start.html")
+        req_pth = os.path.join(os.path.expanduser("~"), "start.html")
+        #req_pth = os.path.join("/tmp", "start.html")
         if os.path.isfile(req_pth):
             #return app.send_static_file(req_pth)
             with open(req_pth, 'r') as fle:
@@ -234,8 +235,7 @@ def start_func():
         import io
         with io.open(req_pth, mode='w', encoding='utf-8') as f:
             f.write(html)
-
-        return html+"xx"
+        return html
 
     except Exception as e:
         return str(e)
@@ -251,6 +251,13 @@ def altdata_func():
         from plotting import alldata, operating_hours, statistics
         from renderer import render
 
+        req_pth = os.path.join(os.path.expanduser("~"), "altdata.html")
+        #req_pth = os.path.join("/tmp", "altdata.html")
+        if os.path.isfile(req_pth):
+            #return app.send_static_file(req_pth)
+            with open(req_pth, 'r') as fle:
+                return fle.read()
+
         ca, ds_s = get_campaign_and_data(se, "Ventilation i faelleskoekkenet 2017")
 
         js_resources, css_resources, plot_script, plot_divs = alldata(ds_s)
@@ -260,6 +267,10 @@ def altdata_func():
         page_text = "Desc"
 
         html = render(page_title, page_header, page_text, js_resources, css_resources, plot_script, plot_divs)
+
+        import io
+        with io.open(req_pth, mode='w', encoding='utf-8') as f:
+            f.write(html)
         return html
 
     except Exception as e:
@@ -272,6 +283,13 @@ def driftstimer_func():
         from plotting import alldata, operating_hours, statistics
         from renderer import render
 
+        req_pth = os.path.join(os.path.expanduser("~"), "driftstimer.html")
+        #req_pth = os.path.join("/tmp", "driftstimer.html")
+        if os.path.isfile(req_pth):
+            #return app.send_static_file(req_pth)
+            with open(req_pth, 'r') as fle:
+                return fle.read()
+
         ca, ds_s = get_campaign_and_data(se, "Ventilation i faelleskoekkenet 2017")
 
         js_resources, css_resources, plot_script, plot_divs = operating_hours(ds_s)
@@ -281,6 +299,10 @@ def driftstimer_func():
         page_text = "Desc"
 
         html = render(page_title, page_header, page_text, js_resources, css_resources, plot_script, plot_divs)
+
+        import io
+        with io.open(req_pth, mode='w', encoding='utf-8') as f:
+            f.write(html)
         return html
 
     except Exception as e:
@@ -293,6 +315,13 @@ def statistik_func():
         from plotting import alldata, operating_hours, statistics
         from renderer import render
 
+        req_pth = os.path.join(os.path.expanduser("~"), "statistik.html")
+        #req_pth = os.path.join("/tmp", "statistik.html")
+        if os.path.isfile(req_pth):
+            #return app.send_static_file(req_pth)
+            with open(req_pth, 'r') as fle:
+                return fle.read()
+
         ca, ds_s = get_campaign_and_data(se, "Ventilation i faelleskoekkenet 2017")
 
         js_resources, css_resources, plot_script, plot_divs = statistics(ds_s)
@@ -302,6 +331,10 @@ def statistik_func():
         page_text = "Desc"
 
         html = render(page_title, page_header, page_text, js_resources, css_resources, plot_script, plot_divs)
+
+        import io
+        with io.open(req_pth, mode='w', encoding='utf-8') as f:
+            f.write(html)
         return html
 
     except Exception as e:
