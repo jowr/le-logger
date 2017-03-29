@@ -213,6 +213,10 @@ def start_func():
         from plotting import alldata, operating_hours, statistics
         from renderer import render
 
+        req_pth = os.path.join(s.STAT_PATH, "start.html")
+        if os.path.isfile(req_pth):
+            return app.send_static_file(req_pth)
+
         ca, ds_s = get_campaign_and_data(se, "Ventilation i faelleskoekkenet 2017")
 
         js_resources = ""
@@ -224,7 +228,12 @@ def start_func():
         page_text = "Brug menuen oeverst for at komme videre til graferne."
 
         html = render(page_title, page_header, page_text, js_resources, css_resources, plot_script, plot_divs)
-        return html
+
+        import io
+        with io.open(req_pth, mode='w', encoding='utf-8') as f:
+            f.write(html)
+
+        return html+"xx"
 
     except Exception as e:
         return str(e)
