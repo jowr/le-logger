@@ -213,7 +213,7 @@ def start_func():
         from plotting import alldata, operating_hours, statistics
         from renderer import render
 
-        req_pth = os.path.join("tmp", "start.html")
+        req_pth = os.path.join("/tmp", "start.html")
         if os.path.isfile(req_pth):
             return app.send_static_file(req_pth)
 
