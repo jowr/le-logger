@@ -340,6 +340,23 @@ def statistik_func():
     except Exception as e:
         return str(e)
 
+@app.route("/refresh")
+def refresh_func():
+    try:
+        fles = []
+        fles.append(os.path.join(os.path.expanduser("~"), "start.html"))
+        fles.append(os.path.join(os.path.expanduser("~"), "altdata.html"))
+        fles.append(os.path.join(os.path.expanduser("~"), "driftstimer.html"))
+        fles.append(os.path.join(os.path.expanduser("~"), "statistik.html"))
+        for fle in fles:
+            if os.path.exists(fle):
+                os.remove(fle)
+
+        return SUCCESS
+
+    except Exception as e:
+        return str(e)
+
 
 #
 import werkzeug

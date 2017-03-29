@@ -179,14 +179,14 @@ def statistics(data_sets=[]):
     all_data_temp = BoxPlot(data_frame, values='temperature', label='box_label', color='colour', responsive=True, xlabel = "Time and place", ylabel = "Temperature / C", legend=False)
     all_data_humi = BoxPlot(data_frame, values='humidity', label='box_label', color='colour', responsive=True, xlabel = "Time and place", ylabel = "Relative humidity / \%", legend=False)
 
-    all_data = gridplot([all_data_temp, all_data_humi], ncols=2, plot_width=500, plot_height=300, sizing_mode='scale_width', 
+    all_data = gridplot([all_data_temp, all_data_humi], ncols=2, plot_width=500, plot_height=400, sizing_mode='scale_width', 
                         toolbar_options=dict(logo="grey"))
                         #toolbar_options=dict(logo="grey", location='above'), merge_tools=False)
 
     merged_data_temp = BoxPlot(data_frame, values='temperature', label='box_label_merged', color='colour_merged', responsive=True, xlabel = "Time and place", ylabel = "Temperature / C", legend=False)
     merged_data_humi = BoxPlot(data_frame, values='humidity', label='box_label_merged', color='colour_merged', responsive=True, xlabel = "Time and place", ylabel = "Relative humidity / \%", legend=False)
 
-    merged_data = gridplot([merged_data_temp, merged_data_humi], ncols=2, plot_width=500, plot_height=300, sizing_mode='scale_width', 
+    merged_data = gridplot([merged_data_temp, merged_data_humi], ncols=2, plot_width=500, plot_height=400, sizing_mode='scale_width', 
                         toolbar_options=dict(logo="grey"))
                         #toolbar_options=dict(logo="grey", location='above'), merge_tools=False)
 
