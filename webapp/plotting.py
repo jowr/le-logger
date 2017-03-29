@@ -1,130 +1,48 @@
 
-import random
+import numpy as np
+import pandas as pd
+
+from bokeh.embed import components
+from bokeh.plotting import figure
+from bokeh.resources import INLINE
+from bokeh.layouts import gridplot
+from bokeh.models import DatetimeTickFormatter
+from bokeh.charts import BoxPlot
+
+from bokeh.palettes import viridis as palette
+
+from database import DataSet
 
 #FIGURE_OPTIONS = dict(plot_width=1200, plot_height=300, logo="grey")
 FIGURE_OPTIONS = dict(logo="grey")
 SCATTER_OPTIONS = dict(alpha=0.5)
-LINE_OPTIONS = dict(line_width=2, alpha=0.5)
-DUMMY_DATA_RND = lambda: [random.choice([i for i in range(100)]) for r in range(10)]
-DUMMY_DATA_SRT = lambda: sorted(DUMMY_DATA_RND())
+LINE_OPTIONS = dict(line_width=2, alpha=0.95)
 
-from bokeh.palettes import viridis
-numlines = 4 #len(toy_df.columns)
-mypalette=viridis(numlines)
+def _get_dummies():
+    data_sets = []
+    for i in range(4):
+        ds = DataSet()
+        ds.set_dummy_data()
+        data_sets.append(ds)
+    return data_sets
 
-#from bokeh.sampledata import download
-#download()
-
-from bokeh.sampledata.glucose import data
-subset = data.ix['2010-10-06']
-#x, y = subset.index.to_series(), subset['glucose']
-
-
-
-def embed_multiple(js_resources, css_resources, script, divs):
-    from jinja2 import Template    
-
-    ########## RENDER PLOTS ################
-
-    # Define our html template for out plots
-    template = Template('''<!DOCTYPE html>
-    <html lang="en">
-        <head>
-            <meta charset="utf-8">
-            <title>Koekken 2017</title>
-            {{ js_resources }}
-            {{ css_resources }}
-        </head>
-        <body>
-        <h2>Koekken 2017</h2>
-
-        <h3>Alt Data</h3>
-        {{ plot_div.all_data }}
-
-        <h3>Dagsdata</h3>
-        {{ plot_div.daily_data }}
-
-        {{ plot_script }}
-        </body>
-    </html>
-    ''')
-
-    html = template.render(js_resources=js_resources,
-                           css_resources=css_resources,
-                           plot_script=script,
-                           plot_div=divs)
-
-    #filename = 'embed_multiple_responsive.html'
-
-    #with io.open(filename, mode='w', encoding='utf-8') as f:
-    #    f.write(html)
-    #
-    #view(filename)
-    return html
-
-
-def embed_multiple_responsive(time_series=[], temp_series=[], humi_series=[]):
-    import io
-    from jinja2 import Template
-
-    from bokeh.embed import components
-    from bokeh.plotting import figure
-    from bokeh.resources import INLINE
-    from bokeh.util.browser import view
-
-    from bokeh.charts import BoxPlot
-
-    from bokeh.layouts import gridplot
-    from bokeh.models import DatetimeTickFormatter
-
-    import pandas as pd
+def alldata(data_sets=[]):    
 
     ########## BUILD FIGURES ################
 
-    if len(time_series) < 1:
-        time_series = [DUMMY_DATA_SRT(), DUMMY_DATA_SRT(), DUMMY_DATA_SRT(), DUMMY_DATA_SRT()]
-    if len(temp_series) < 1:
-        temp_series = [DUMMY_DATA_SRT(), DUMMY_DATA_SRT(), DUMMY_DATA_SRT(), DUMMY_DATA_SRT()]
-    if len(humi_series) < 1:
-        humi_series = [DUMMY_DATA_SRT(), DUMMY_DATA_SRT(), DUMMY_DATA_SRT(), DUMMY_DATA_SRT()]
+    if len(data_sets) < 1:
+        data_sets = _get_dummies()
 
-    series_count = len(time_series)
-    colours = viridis(series_count)
-
-    labels = []
-    data_frames = []
-    data_frames_filtered = []
-    for i in range(series_count):
-        data_frame = pd.DataFrame(columns=['time', 'temp', 'humi'])
-        data_frame['time'] = time_series[i]
-        data_frame['temp'] = temp_series[i]
-        data_frame['humi'] = humi_series[i]
-        data_frames.append(data_frame)
-        labels.append(str(i))
-
-        hours_filter = (data_frame.time.dt.hour >= 15) & (data_frame.time.dt.hour <= 21)
-
-        data_frame = pd.DataFrame(columns=['time', 'temp', 'humi', 'hour'])
-        data_frame['time'] = time_series[i][hours_filter]
-        data_frame['hour'] = data_frame.time.dt.time
-        data_frame['hour_int'] = data_frame.time.dt.hour
-        data_frame['temp'] = temp_series[i][hours_filter]
-        data_frame['humi'] = humi_series[i][hours_filter]
-        data_frames_filtered.append(data_frame)
-
-    ########## ALL DATA ################
+    series_count = len(data_sets)
+    colours = palette(series_count)
 
     all_data_temp = figure(responsive=True, x_axis_label = "Days", x_axis_type = "datetime", y_axis_label = "Temperature / C", y_axis_type = "linear", **FIGURE_OPTIONS)
-    #all_data_temp.multi_line(time_series, temp_series, line_color=viridis(len(time_series)), **LINE_OPTIONS)
-    for (clr, leg, xda, yda ) in zip(colours, labels, time_series, temp_series):
-        #my_plot = all_data_temp.line(xda, yda, color = clr, legend = leg, **LINE_OPTIONS)
-        my_plot = all_data_temp.scatter(xda, yda, color = clr, legend = leg, **SCATTER_OPTIONS)
+    for (clr, ds) in zip(colours, data_sets):
+        my_plot = all_data_temp.line(ds.time_series, ds.temp_series, color = clr, legend = ds.name, **LINE_OPTIONS)
 
     all_data_humi = figure(x_range=all_data_temp.x_range, responsive=True, x_axis_label = "Days", x_axis_type = "datetime", y_axis_label = "Relative humidity / \%", y_axis_type = "linear", **FIGURE_OPTIONS)
-    #all_data_humi.multi_line(time_series, humi_series, line_color=viridis(len(time_series)), **LINE_OPTIONS)
-    for (clr, leg, xda, yda ) in zip(colours, labels, time_series, humi_series):
-        #my_plot = all_data_humi.line(xda, yda, color = clr, legend = leg, **LINE_OPTIONS)
-        my_plot = all_data_humi.scatter(xda, yda, color = clr, legend = leg, **SCATTER_OPTIONS)
+    for (clr, ds) in zip(colours, data_sets):
+        my_plot = all_data_humi.line(ds.time_series, ds.humi_series, color = clr, legend = ds.name, **LINE_OPTIONS)
 
     for p in [all_data_temp, all_data_humi]:
         p.xaxis.formatter=DatetimeTickFormatter(formats=dict(
@@ -138,25 +56,62 @@ def embed_multiple_responsive(time_series=[], temp_series=[], humi_series=[]):
                         toolbar_options=dict(logo="grey"))
                         #toolbar_options=dict(logo="grey", location='above'), merge_tools=False)
 
-    ########## DAILY DATA ################  
 
-    #daily_data_temp = figure(responsive=True, x_axis_label = "Time / h", x_axis_type = "datetime", y_axis_label = "Temperature / C", y_axis_type = "linear", **FIGURE_OPTIONS)
-    ##daily_data_temp.multi_line(hours_series, temp_series, line_color=viridis(len(time_series)), **LINE_OPTIONS)
-    #for (clr, leg, frm ) in zip(colours, labels, data_frames_filtered):
-    #    #my_plot = daily_data_temp.line(xda, yda, color = clr, legend = leg)
-    #    my_plot = daily_data_temp.scatter(frm['hour'], frm['temp'], color = clr, legend = leg, **SCATTER_OPTIONS)
+    ########## RENDER PLOTS ################
 
-    daily_data_temp = BoxPlot(data_frames_filtered[0], values='temp', label='hour_int', plot_width=400)
+    resources = INLINE
+    js_resources = resources.render_js()
+    css_resources = resources.render_css()
+    plot_script, plot_divs = components({'Oversigt over alt data': all_data})
 
-    #daily_data_humi = figure(x_range=daily_data_temp.x_range, responsive=True, x_axis_label = "Time / h", x_axis_type = "datetime", y_axis_label = "Relative humidity / \%", y_axis_type = "linear", **FIGURE_OPTIONS)
-    ##daily_data_humi.multi_line(hours_series, humi_series, line_color=viridis(len(time_series)), **LINE_OPTIONS)
-    #for (clr, leg, frm ) in zip(colours, labels, data_frames_filtered):
-    #    #my_plot = daily_data_humi.line(xda, yda, color = clr, legend = leg)
-    #    my_plot = daily_data_humi.scatter(frm['hour'], frm['humi'], color = clr, legend = leg, **SCATTER_OPTIONS)
+    return js_resources, css_resources, plot_script, plot_divs
 
-    daily_data_humi = BoxPlot(data_frames_filtered[0], values='humi', label='hour_int', plot_width=400)
 
-    for p in [daily_data_temp, daily_data_humi]:
+
+def operating_hours(data_sets=[]):
+
+    ########## BUILD FIGURES ################
+
+    if len(data_sets) < 1:
+        data_sets = _get_dummies()
+
+    series_count = len(data_sets)
+    colours = palette(series_count)
+
+    data_frames = []
+    for ds in data_sets:
+        df = ds.as_data_frame()
+        day_filter = (df['timestamp'].dt.dayofweek == 5) | (df['timestamp'].dt.dayofweek == 6)
+        #df = df.drop(df[day_filter].index)
+        hour_filter = (df['timestamp'].dt.hour < 15) | (df['timestamp'].dt.hour > 21)
+        #df = df.drop(df[hour_filter].index)
+
+        #df = df.drop(df[day_filter | hour_filter].index)
+
+        #df['temperature'][day_filter | hour_filter] = np.NaN
+        #df['humidity'][day_filter | hour_filter] = np.NaN
+
+        idx = df.ix[day_filter | hour_filter].index
+        #df.temperature[idx] = np.NaN
+        #df.humidity[idx] = np.NaN
+        df.loc[idx,'temperature'] = np.NaN
+        df.loc[idx,'humidity'] = np.NaN
+        #df.at[dates[5], 'E'] = 7
+
+        df['time'] = df['timestamp'].dt.time
+        data_frames.append(df)
+
+    all_data_temp = figure(responsive=True, x_axis_label = "Time of day", x_axis_type = "datetime", y_axis_label = "Temperature / C", y_axis_type = "linear", **FIGURE_OPTIONS)
+    for (clr, ds, df) in zip(colours, data_sets, data_frames):
+        #my_plot = all_data_temp.scatter(df.time, df.temperature, color = clr, legend = ds.name, **SCATTER_OPTIONS)
+        my_plot = all_data_temp.line(df.time, df.temperature, color = clr, legend = ds.name, **LINE_OPTIONS)
+
+    all_data_humi = figure(x_range=all_data_temp.x_range, responsive=True, x_axis_label = "Time of day", x_axis_type = "datetime", y_axis_label = "Relative humidity / \%", y_axis_type = "linear", **FIGURE_OPTIONS)
+    for (clr, ds, df) in zip(colours, data_sets, data_frames):
+        my_plot = all_data_humi.scatter(df.time, df.humidity, color = clr, legend = ds.name, **SCATTER_OPTIONS)
+        #my_plot = all_data_humi.line(df.time, df.humidity, color = clr, legend = ds.name, **LINE_OPTIONS)
+
+    for p in [all_data_temp, all_data_humi]:
         p.xaxis.formatter=DatetimeTickFormatter(formats=dict(
             hours=["%k:%M"],
             days=["%d. %m. %y"],
@@ -164,7 +119,7 @@ def embed_multiple_responsive(time_series=[], temp_series=[], humi_series=[]):
             years=["%Y"],
         ))
 
-    daily_data = gridplot([daily_data_temp, daily_data_humi], ncols=2, plot_width=500, plot_height=250, sizing_mode='scale_width', 
+    all_data = gridplot([all_data_temp, all_data_humi], ncols=2, plot_width=500, plot_height=250, sizing_mode='scale_width', 
                         toolbar_options=dict(logo="grey"))
                         #toolbar_options=dict(logo="grey", location='above'), merge_tools=False)
 
@@ -174,123 +129,73 @@ def embed_multiple_responsive(time_series=[], temp_series=[], humi_series=[]):
     resources = INLINE
     js_resources = resources.render_js()
     css_resources = resources.render_css()
-    script, divs = components({'all_data': all_data, 'daily_data': daily_data})
+    plot_script, plot_divs = components({'Data fra kl. 15 - 22, uden loerdag': all_data})
 
-    return embed_multiple(js_resources, css_resources, script, divs)
-
-def embed_responsive_width_height():
-    """ This example shows how a Bokeh plot can be embedded in an HTML
-    document, in a way that the plot resizes to make use of the available
-    width and height (while keeping the aspect ratio fixed).
-    To make this work well, the plot should be placed in a container that
-    *has* a certain width and height (i.e. non-scrollable), which is the
-    body element in this case. A more realistic example might be embedding
-    a plot in a Phosphor widget.
-    """
-    import random
-
-    from bokeh.io import output_file, show
-    from bokeh.plotting import figure
-
-    PLOT_OPTIONS = dict(plot_width=600, plot_height=400)
-    SCATTER_OPTIONS = dict(size=12, alpha=0.5)
-
-    data = lambda: [random.choice([i for i in range(100)]) for r in range(10)]
-
-    red = figure(sizing_mode='scale_both', tools='pan', **PLOT_OPTIONS)
-    red.scatter(data(), data(), color="red", **SCATTER_OPTIONS)
-    return red
-    #output_file('embed_responsive_width_height.html')
-    #show(red)
+    return js_resources, css_resources, plot_script, plot_divs
 
 
-def embed_themed():
+def statistics(data_sets=[]):
 
-    import io
+    ########## BUILD FIGURES ################
 
-    from jinja2 import Template
+    if len(data_sets) < 1:
+        data_sets = _get_dummies()
 
-    from bokeh.embed import components
-    from bokeh.resources import INLINE
-    from bokeh.util.browser import view
-    from bokeh.themes import Theme
-    from bokeh.plotting import figure
+    series_count = len(data_sets)
+    colours = palette(series_count)
 
-    x1 = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    y1 = [0, 8, 2, 4, 6, 9, 5, 6, 25, 28, 4]
+    data_frame = pd.DataFrame()
+    data_frames = []
+    for ds in data_sets:
+        df = ds.as_data_frame()
+        day_filter = (df['timestamp'].dt.dayofweek == 5) | (df['timestamp'].dt.dayofweek == 6)
+        #df = df.drop(df[day_filter].index)
+        hour_filter = (df['timestamp'].dt.hour < 15) | (df['timestamp'].dt.hour > 21)
+        #df = df.drop(df[hour_filter].index)
 
-    p1 = figure(title='DARK THEMED PLOT')
-    p1.scatter(x1, y1)
+        #df = df.drop(df[day_filter | hour_filter].index)
 
-    theme = Theme(json={
-        'attrs': {
-            'Figure': {
-                'background_fill_color': '#2F2F2F',
-                'border_fill_color': '#2F2F2F',
-                'outline_line_color': '#444444'
-                },
-            'Axis': {
-                'axis_line_color': "white",
-                'axis_label_text_color': "white",
-                'major_label_text_color': "white",
-                'major_tick_line_color': "white",
-                'minor_tick_line_color': "white",
-                'minor_tick_line_color': "white"
-                },
-            'Grid': {
-                'grid_line_dash': [6, 4],
-                'grid_line_alpha': .3
-                },
-            'Circle': {
-                'fill_color': 'lightblue',
-                'size': 10,
-                },
-            'Title': {
-                'text_color': "white"
-                }
-            }
-        })
+        #df['temperature'][day_filter | hour_filter] = np.NaN
+        #df['humidity'][day_filter | hour_filter] = np.NaN
 
-    script, div = components(p1, theme=theme)
+        idx = df.ix[day_filter | hour_filter].index
+        #df.temperature[idx] = np.NaN
+        #df.humidity[idx] = np.NaN
+        df.loc[idx,'temperature'] = np.NaN
+        df.loc[idx,'humidity'] = np.NaN
+        #df.at[dates[5], 'E'] = 7
+        df = df.drop(idx)
 
-    template = Template('''<!DOCTYPE html>
-    <html lang="en">
-        <head>
-            <meta charset="utf-8">
-            <title>Bokeh Scatter Plots</title>
-            {{ js_resources }}
-            {{ css_resources }}
-            {{ script }}
-            <style>
-                body {
-                    background: #2F2F2F;
-                }
-                .embed-wrapper {
-                    width: 50%;
-                    height: 400px;
-                    margin: auto;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="embed-wrapper">
-            {{ div }}
-            </div>
-        </body>
-    </html>
-    ''')
+        df['time'] = df['timestamp'].dt.time
+        df['box_label'] = ["{1}-{2} - {0}".format(ds.name, tt, tt+1) for tt in df['timestamp'].dt.hour]
+        df['box_label_merged'] = ["kl. {1}-{2} - {0}".format(ds.name.split(',')[0], tt, tt+1) for tt in df['timestamp'].dt.hour]
+        df.loc[:,'colour'] = ds.name
+        df.loc[:,'colour_merged'] = ds.name.split(',')[0]
+        data_frames.append(df)
+        data_frame = pd.concat([data_frame,df], ignore_index=True)
 
-    js_resources = INLINE.render_js()
-    css_resources = INLINE.render_css()
+    #data_frame = pd.DataFrame(columns=['timestamp', 'temperature', 'humidity', 'box_label'])
 
-    filename = 'embed_simple.html'
+    all_data_temp = BoxPlot(data_frame, values='temperature', label='box_label', color='colour', responsive=True, xlabel = "Time and place", ylabel = "Temperature / C", legend=False)
+    all_data_humi = BoxPlot(data_frame, values='humidity', label='box_label', color='colour', responsive=True, xlabel = "Time and place", ylabel = "Relative humidity / \%", legend=False)
 
-    html = template.render(js_resources=js_resources,
-                           css_resources=css_resources,
-                           script=script,
-                           div=div)
+    all_data = gridplot([all_data_temp, all_data_humi], ncols=2, plot_width=500, plot_height=500, sizing_mode='scale_width', 
+                        toolbar_options=dict(logo="grey"))
+                        #toolbar_options=dict(logo="grey", location='above'), merge_tools=False)
 
-    #with io.open(filename, mode='w', encoding='utf-8') as f:
-    #    f.write(html)
-    #view(filename)
-    return html
+    merged_data_temp = BoxPlot(data_frame, values='temperature', label='box_label_merged', color='colour_merged', responsive=True, xlabel = "Time and place", ylabel = "Temperature / C", legend=False)
+    merged_data_humi = BoxPlot(data_frame, values='humidity', label='box_label_merged', color='colour_merged', responsive=True, xlabel = "Time and place", ylabel = "Relative humidity / \%", legend=False)
+
+    merged_data = gridplot([merged_data_temp, merged_data_humi], ncols=2, plot_width=500, plot_height=500, sizing_mode='scale_width', 
+                        toolbar_options=dict(logo="grey"))
+                        #toolbar_options=dict(logo="grey", location='above'), merge_tools=False)
+
+
+    ########## RENDER PLOTS ################
+
+    resources = INLINE
+    js_resources = resources.render_js()
+    css_resources = resources.render_css()
+    plot_script, plot_divs = components({'Data fra kl. 15 - 22, uden loerdag': all_data, 'Data fra kl. 15 - 22, uden loerdag, reference og uden udsugning': merged_data})
+
+    return js_resources, css_resources, plot_script, plot_divs

@@ -167,36 +167,70 @@ if False:
 
 if True:
     import io
-    from plotting import embed_multiple_responsive, embed_themed
+    from jinja2 import Template
 
     from sqlalchemy.orm import sessionmaker
-    from database import Campaign, DataSet, create_models_engine
+    
+    from database import Campaign, DataSet, create_models_engine, get_campaign_and_data
+    from plotting import alldata, operating_hours, statistics
+    from renderer import render
 
     engine = create_models_engine(s.PGDB_URI)
     Session = sessionmaker(bind=engine)
     se = Session()
 
-    time_series = []
-    temp_series = []
-    humi_series = []
+    ca, ds_s = get_campaign_and_data(se, "Ventilation i faelleskoekkenet 2017")
 
-    ca_s = se.query(Campaign).filter(Campaign.id == 1).all()
-    for ca in ca_s:
-        ds_s = se.query(DataSet).filter(DataSet.campaign_id == ca.id).all()
-        for ds in ds_s:
-            #fig.line(ds.time_series, ds.temp_series)
-            time_series.append(ds.time_series)
-            temp_series.append(ds.temp_series)
-            humi_series.append(ds.humi_series)
+    js_resources, css_resources, plot_script, plot_divs = alldata(ds_s)
 
-    html = embed_multiple_responsive(time_series=time_series, temp_series=temp_series, humi_series=humi_series)
-    filename = 'embed_multiple_responsive.html'
+    page_title = ca.name
+    page_header = ca.name
+    page_text = "Desc"
+
+    html = render(page_title, page_header, page_text, js_resources, css_resources, plot_script, plot_divs)
+
+    filename = 'altdata.html'
     with io.open(os.path.join(s.STAT_PATH,filename), mode='w', encoding='utf-8') as f:
         f.write(html)
 
-    #html = embed_themed()
-    #filename = 'embed_themed.html'
-    #with io.open(os.path.join(s.STAT_PATH,filename), mode='w', encoding='utf-8') as f:
-    #    f.write(html)
+
+    js_resources, css_resources, plot_script, plot_divs = operating_hours(ds_s)
+
+    page_title = ca.name
+    page_header = ca.name
+    page_text = "Desc"
+
+    html = render(page_title, page_header, page_text, js_resources, css_resources, plot_script, plot_divs)
+
+    filename = 'driftstimer.html'
+    with io.open(os.path.join(s.STAT_PATH,filename), mode='w', encoding='utf-8') as f:
+        f.write(html)
+
+
+    js_resources, css_resources, plot_script, plot_divs = statistics(ds_s)
+
+    page_title = ca.name
+    page_header = ca.name
+    page_text = "Desc"
+
+    html = render(page_title, page_header, page_text, js_resources, css_resources, plot_script, plot_divs)
+
+    filename = 'statistik.html'
+    with io.open(os.path.join(s.STAT_PATH,filename), mode='w', encoding='utf-8') as f:
+        f.write(html)
+
+    js_resources = ""
+    css_resources = ""
+    plot_script = ""
+    plot_divs = {"Startside":""}
+    page_title = ca.name
+    page_header = ca.name
+    page_text = "Brug menuen oeverst for at komme videre til graferne."
+
+    html = render(page_title, page_header, page_text, js_resources, css_resources, plot_script, plot_divs)
+
+    filename = 'start.html'
+    with io.open(os.path.join(s.STAT_PATH,filename), mode='w', encoding='utf-8') as f:
+        f.write(html)
 
     sys.exit(0)

@@ -7,7 +7,15 @@ BASE_PATH = os.path.realpath(os.path.dirname(__file__))
 if BASE_PATH not in sys.path:
     sys.path = [BASE_PATH] + sys.path
 
+
+
+from sqlalchemy.orm import sessionmaker    
+from database import create_models_engine
 from settings import const as s
+
+engine = create_models_engine(s.PGDB_URI)
+Session = sessionmaker(bind=engine)
+se = Session()
 
 # The main app
 import flask 
@@ -198,60 +206,86 @@ def read_database():
     except Exception as e:
         return str(e)
 
-#https://github.com/bokeh/bokeh/blob/master/examples/embed/embed_multiple_responsive.py
-@app.route("/koekken2017")
-def koekken2017():
-    from sqlalchemy.orm import sessionmaker
-    from database import Campaign, DataSet
-    import numpy as np
-    from bokeh.embed import components
-    from bokeh.plotting import figure
-    from bokeh.resources import INLINE
 
+@app.route("/start.html")
+def start_func():
     try:
-        engine = db.create_models_engine(s.PGDB_URI)
-        Session = sessionmaker(bind=engine)
-        se = Session()
+        from database import Campaign, DataSet, get_campaign_and_data
+        from plotting import alldata, operating_hours, statistics
+        from renderer import render
 
-        ret = ""
+        js_resources = ""
+        css_resources = ""
+        plot_script = ""
+        plot_divs = {"Startside":""}
+        page_title = ca.name
+        page_header = ca.name
+        page_text = "Brug menuen oeverst for at komme videre til graferne."
 
-        fig = figure()
+        html = render(page_title, page_header, page_text, js_resources, css_resources, plot_script, plot_divs)
+        return html
 
-        ca_s = se.query(Campaign).all()
-        for ca in ca_s:
-            ds_s = se.query(DataSet).filter(DataSet.campaign_id == ca.id).all()
-            for ds in ds_s:
-                fig.line(ds.time_series, ds.temp_series)
-        
-        
-        # Define our html template for out plots
-        from jinja2 import Template
-        template = Template('''<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>Responsive plots</title>
-        {{ js_resources }}
-        {{ css_resources }}
-    </head>
-    <body>
-    <h2>Resize the window to see some plots resizing</h2>
-    <h3>Figure, responsive</h3>
-    {{ plot_div.fig }}
-    {{ plot_script }}
-    </body>
-</html>
-''')
-    
-        resources = INLINE
-        js_resources = resources.render_js()
-        css_resources = resources.render_css()
-        script, div = components({'fig': fig})
-        html = template.render(js_resources=js_resources,
-                               css_resources=css_resources,
-                               plot_script=script,plot_div=div)
+    except Exception as e:
+        return str(e)
 
-        #return encode_utf8(html)
+@app.route("/altdata.html")
+def altdata_func():
+    try:
+        from database import Campaign, DataSet, get_campaign_and_data
+        from plotting import alldata, operating_hours, statistics
+        from renderer import render
+
+        ca, ds_s = get_campaign_and_data(se, "Ventilation i faelleskoekkenet 2017")
+
+        js_resources, css_resources, plot_script, plot_divs = alldata(ds_s)
+
+        page_title = ca.name
+        page_header = ca.name
+        page_text = "Desc"
+
+        html = render(page_title, page_header, page_text, js_resources, css_resources, plot_script, plot_divs)
+        return html
+
+    except Exception as e:
+        return str(e)
+
+@app.route("/driftstimer.html")
+def driftstimer_func():
+    try:
+        from database import Campaign, DataSet, get_campaign_and_data
+        from plotting import alldata, operating_hours, statistics
+        from renderer import render
+
+        ca, ds_s = get_campaign_and_data(se, "Ventilation i faelleskoekkenet 2017")
+
+        js_resources, css_resources, plot_script, plot_divs = operating_hours(ds_s)
+
+        page_title = ca.name
+        page_header = ca.name
+        page_text = "Desc"
+
+        html = render(page_title, page_header, page_text, js_resources, css_resources, plot_script, plot_divs)
+        return html
+
+    except Exception as e:
+        return str(e)
+
+@app.route("/statistik.html")
+def statistik_func():
+    try:
+        from database import Campaign, DataSet, get_campaign_and_data
+        from plotting import alldata, operating_hours, statistics
+        from renderer import render
+
+        ca, ds_s = get_campaign_and_data(se, "Ventilation i faelleskoekkenet 2017")
+
+        js_resources, css_resources, plot_script, plot_divs = statistics(ds_s)
+
+        page_title = ca.name
+        page_header = ca.name
+        page_text = "Desc"
+
+        html = render(page_title, page_header, page_text, js_resources, css_resources, plot_script, plot_divs)
         return html
 
     except Exception as e:
