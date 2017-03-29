@@ -215,7 +215,9 @@ def start_func():
 
         req_pth = os.path.join("/tmp", "start.html")
         if os.path.isfile(req_pth):
-            return app.send_static_file(req_pth)
+            #return app.send_static_file(req_pth)
+            with open(req_pth, 'r') as fle:
+                return fle.read()
 
         ca, ds_s = get_campaign_and_data(se, "Ventilation i faelleskoekkenet 2017")
 
